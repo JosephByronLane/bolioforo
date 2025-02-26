@@ -8,9 +8,10 @@ export default function Home() {
       <main className="main">
         <div className="container">
           <h1 style={{ 
-            marginBottom: '2rem', 
+            marginBottom: '8rem', 
+            marginTop: '8rem',
             textAlign: 'center',
-            fontSize: '4rem',
+            fontSize: '8rem',
             fontWeight: 'bold',
             padding: '3rem 0',
             letterSpacing: '2px',

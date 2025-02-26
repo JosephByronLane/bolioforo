@@ -2,31 +2,46 @@
 
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import useSWR from 'swr';
 import Navbar from '../../components/Navbar';
 import Post from '../../components/Post';
-import forumData from '../../../data/forumData';
+import { fetcher } from '../../lib/api';
 
 export default function SubtopicPage() {
   const params = useParams();
   const { mainTopic, subtopic } = params;
   
-  // Find the current main topic
-  const currentMainTopic = forumData.find(
-    (topic) => topic.id === mainTopic
-  );
-  
-  // Find the current subtopic
-  const currentSubtopic = currentMainTopic?.subtopics.find(
-    (sub) => sub.id === subtopic
+  const { data, error, isLoading } = useSWR(
+    `/api/subtopic/${mainTopic}/${subtopic}`,
+    fetcher
   );
 
-  if (!currentMainTopic || !currentSubtopic) {
+  if (isLoading) {
     return (
       <div>
         <Navbar />
         <main className="main">
           <div className="container">
-            <h1>Tema no encontrado</h1>
+            <div style={{ marginBottom: '2rem' }}>
+              <Link href="/" style={{ color: 'var(--accent-color)' }}>
+                ← Volver al foro
+              </Link>
+            </div>
+            <div className="loading">Loading content...</div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <div>
+        <Navbar />
+        <main className="main">
+          <div className="container">
+            <h1>Error</h1>
+            <p>{error?.message || 'Failed to load content'}</p>
             <Link href="/" className="btn">
               Volver al inicio
             </Link>
@@ -47,15 +62,19 @@ export default function SubtopicPage() {
             </Link>
           </div>
           
-          <h1 style={{ marginBottom: '0.5rem' }}>{currentSubtopic.title}</h1>
+          <h1 style={{ marginBottom: '0.5rem' }}>{data.subtopic.title}</h1>
           <p style={{ marginBottom: '2rem', color: '#aaa' }}>
-            {currentMainTopic.title}
+            {data.topic.title} • {data.subtopic.post_count || 0} posts
           </p>
           
           <div className="posts-container">
-            {currentSubtopic.posts.map((post) => (
-              <Post key={post.id} post={post} />
-            ))}
+            {data.posts && data.posts.length > 0 ? (
+              data.posts.map((post) => (
+                <Post key={post.id} post={post} />
+              ))
+            ) : (
+              <p>No hay posts en este tema todavía.</p>
+            )}
           </div>
         </div>
       </main>

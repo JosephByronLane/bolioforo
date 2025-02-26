@@ -1,11 +1,13 @@
 'use client';
 
 import Link from 'next/link';
+import useSWR from 'swr';
 import { usePathname } from 'next/navigation';
-import forumData from '../../data/forumData';
+import { fetcher } from '../lib/api';
 
 export default function Navbar() {
   const pathname = usePathname();
+  const { data, error, isLoading } = useSWR('/api/topics', fetcher);
 
   return (
     <nav style={{ 
@@ -27,7 +29,7 @@ export default function Navbar() {
           marginRight: '2rem'
         }}>
           El BolioForo
-        </Link>
+        </Link>      
 
       </div>
     </nav>

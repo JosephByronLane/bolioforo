@@ -12,4 +12,21 @@ services:
       - ./public:/app/public
       - ./data:/app/data
     environment:
-      - NODE_ENV=development
+      - DATABASE_URL=mysql://bolioforo:password@db:3306/bolioforo
+    depends_on:
+      - db
+  db:
+    image: mariadb:latest
+    volumes:
+      - mariadb_data:/var/lib/mysql
+      - ./db/init:/docker-entrypoint-initdb.d
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpassword
+      - MYSQL_DATABASE=bolioforo
+      - MYSQL_USER=bolioforo
+      - MYSQL_PASSWORD=password
+    ports:
+      - "3306:3306"
+
+volumes:
+  mariadb_data:

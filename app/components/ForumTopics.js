@@ -1,28 +1,25 @@
 'use client';
 
 import Link from 'next/link';
-import forumData from '../../data/forumData';
+import useSWR from 'swr';
+import { fetcher, getLatestPostDate } from '../lib/api';
 
 export default function ForumTopics() {
-  // Function to get the latest post date from a subtopic
-  const getLatestPostDate = (posts) => {
-    if (posts.length === 0) return null;
-    
-    // Convert date strings to Date objects for comparison
-    const dates = posts.map(post => new Date(post.date));
-    const latestDate = new Date(Math.max(...dates));
-    
-    // Format the date
-    return latestDate.toLocaleDateString('es-ES', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  };
+  const { data, error, isLoading } = useSWR('/api/topics', fetcher);
+
+  if (isLoading) {
+    return <div className="loading">Loading forum topics...</div>;
+  }
+
+  if (error) {
+    return <div className="error">Error: {error.message || 'Failed to load topics'}</div>;
+  }
+
+  const topics = data || [];
 
   return (
     <div>
-      {forumData.map((topic) => (
+      {topics.map((topic) => (
         <div key={topic.id} id={topic.id} className="section">
           <h2 className="section-title">{topic.title}</h2>
           <div style={{ 
@@ -36,7 +33,7 @@ export default function ForumTopics() {
               flexDirection: 'column',
               gap: '1rem'
             }}>
-              {topic.subtopics.map((subtopic) => (
+              {topic.subtopics && topic.subtopics.map((subtopic) => (
                 <Link 
                   href={`/${topic.id}/${subtopic.id}`} 
                   key={subtopic.id}
@@ -69,7 +66,7 @@ export default function ForumTopics() {
                         fontSize: '0.9rem',
                         color: '#aaa',
                       }}>
-                        {subtopic.posts.length} {subtopic.posts.length === 1 ? 'post' : 'posts'}
+                        {subtopic.post_count || 0} {subtopic.post_count === 1 ? 'post' : 'posts'}
                       </p>
                     </div>
                     <div style={{
@@ -80,7 +77,8 @@ export default function ForumTopics() {
                       borderRadius: '4px',
                       whiteSpace: 'nowrap'
                     }}>
-                      Último post: {getLatestPostDate(subtopic.posts)}
+                      Último post: {getLatestPostDate(subtopic.latest_post_date)}
+                      {subtopic.latest_post_author && ` por ${subtopic.latest_post_author}`}
                     </div>
                   </div>
                 </Link>
