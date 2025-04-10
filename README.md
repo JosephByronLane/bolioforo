@@ -51,7 +51,3 @@ El proyecto incluye:
 - Un `Dockerfile` optimizado para producción
 - Un archivo `docker-compose.yml` con configuración para desarrollo
 - Un archivo `.dockerignore` para excluir archivos innecesarios
-
-## Licencia
-
-Este proyecto está bajo la Licencia MIT.
